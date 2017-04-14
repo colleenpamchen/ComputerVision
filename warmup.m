@@ -39,7 +39,8 @@ imshow( B )
 imwrite(B,'fig2c.jpg')
 
 
-
+% conv2() 
+% derivatives and integrals: linear operations that are used for filtering 
 
 
 
