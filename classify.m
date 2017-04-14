@@ -13,17 +13,54 @@
 %% download cifar10 dataset
 system('wget https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz') 
 system('tar -xzvf cifar-10-matlab.tar.gz')
-load cifar-10-batches-mat/test_batch.mat
 
-%% convert test dataset of cifar10, and save
+load cifar-10-batches-mat/data_batch_1.mat
+% load batches.meta.mat
+
+%% convert training dataset of cifar10 
 X = reshape(data', [32, 32, 3, 10000]);
 X = permute(X, [2 1 3 4]);
 Y = labels + 1;
 
-
 save cifar10-test X Y
 %% preview one picture
+figure;
 imshow(imresize(X(:,:,:,2), [128, 128]))
+
+load cifar-10-batches-mat/test_batch.mat
+test = reshape(data', [32, 32, 3, 10000]);
+test = permute(test, [2 1 3 4]);
+test_label = labels + 1;
+
+figure; 
+imshow(imresize(test(:,:,:,2), [128, 128]))
+
+
+%% knn classification 
+
+n=10;
+load cifar-10-batches-mat/data_batch_1.mat
+
+train = double(data(1:n,:)) ; 
+y_train = labels(1:n); 
+
+load cifar-10-batches-mat/test_batch.mat
+test = double(data(1:n,:));
+y_test= labels(1:n); 
+
+knn=1;
+
+for i = 1:n
+    for j = 1:n
+
+[class] = KNNClassifier( train, test(i,:), knn, y_train) % check one test sample against all training samples 
+
+
+    end
+end
+
+
+
 
 
 %%
