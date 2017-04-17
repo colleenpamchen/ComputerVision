@@ -5,7 +5,7 @@ system('tar -xzvf cifar-10-matlab.tar.gz')
 %% load CIFAR images 
 load('cifar-10-batches-mat/batches.meta.mat')
 load cifar-10-batches-mat/data_batch_1.mat
-n=2000; % SUBSAMPLE SIZE 
+n=5000; % SUBSAMPLE SIZE 
 train = double(data(1:n,:)) ; 
 y_train = labels(1:n); 
 %% display first airplane image from test set 
@@ -67,7 +67,7 @@ accuracy = (trace(C)/10);
 figure;
 imagesc(C); 
 colorbar 
-title(sprintf('class confusion matrix, average classification accuracy: %d',accuracy))
+title(sprintf('class confusion matrix, average classification accuracy: %f',accuracy))
 
 % plot figures 
 % figure;
@@ -96,127 +96,133 @@ for k=1:length(knn)
     end
     
     [C,order] = confusionmat( neighbors(:,1,k), neighbors(:,2,k) );
-    error = (trace(C)/10);
+    error = 100 - (trace(C)/10);
 
     figure;
     imagesc(C); 
     colorbar 
-    title( sprintf( 'Classification error: %d at KNN=%d ',error, knn(k) ) )
+    title( sprintf( 'Classification error: %f at KNN=%d ',error, knn(k) ) )
+
+end
+
+%% KNN cosine similarity / normalized correlation: 
+
+D = pdist2(train,test,'cosine'); % returns D(i,j) where X(i) Y(j)
+
+knn=[1 3 5];
+neighbors = zeros(n,3,length(knn));
+
+for k=1:length(knn) 
+    
+    for traincol=1:n
+        
+        [colval,colidx] = sort(D(:,traincol));
+        neighbor1 = traincol; % training obs 
+        neighbors2 = colidx(1:knn(k)); % test obs
+        class = mode( test_label( neighbors2(:) ) ); 
+        neighbors(traincol,1,k) = train_label(neighbor1); % training label 
+        neighbors(traincol,2,k) = class; % predicted class label 
+        neighbors(traincol,3,k) = test_label(neighbors2(1)); %  
+    end
+    
+    [C,order] = confusionmat( neighbors(:,1,k), neighbors(:,2,k) );
+    accuracy = (trace(C)/10);
+
+    figure;
+    imagesc(C); 
+    colorbar 
+    title( sprintf( 'Classification accuracy: %f at KNN=%d ',accuracy, knn(k) ) )
 
 end
 
 
+%% Spearman 
 
-%%
+D = pdist2(train,test,'spearman'); % returns D(i,j) where X(i) Y(j)
 
+knn=[1 3 5];
+neighbors = zeros(n,3,length(knn));
 
+for k=1:length(knn) 
+    
+    for traincol=1:n
+        
+        [colval,colidx] = sort(D(:,traincol));
+        neighbor1 = traincol; % training obs 
+        neighbors2 = colidx(1:knn(k)); % test obs
+        class = mode( test_label( neighbors2(:) ) ); 
+        neighbors(traincol,1,k) = train_label(neighbor1); % training label 
+        neighbors(traincol,2,k) = class; % predicted class label 
+        neighbors(traincol,3,k) = test_label(neighbors2(1)); %  
+    end
+    
+    [C,order] = confusionmat( neighbors(:,1,k), neighbors(:,2,k) );
+    accuracy = (trace(C)/10);
 
+    figure;
+    imagesc(C); 
+    colorbar 
+    title( sprintf( 'Classification accuracy: %f at KNN=%d ',accuracy, knn(k) ) )
 
+end
 
+%% correlation 
 
+D = pdist2(train,test,'correlation'); % returns D(i,j) where X(i) Y(j)
 
+knn=[1 3 5];
+neighbors = zeros(n,3,length(knn));
 
+for k=1:length(knn) 
+    
+    for traincol=1:n
+        
+        [colval,colidx] = sort(D(:,traincol));
+        neighbor1 = traincol; % training obs 
+        neighbors2 = colidx(1:knn(k)); % test obs
+        class = mode( test_label( neighbors2(:) ) ); 
+        neighbors(traincol,1,k) = train_label(neighbor1); % training label 
+        neighbors(traincol,2,k) = class; % predicted class label 
+        neighbors(traincol,3,k) = test_label(neighbors2(1)); %  
+    end
+    
+    [C,order] = confusionmat( neighbors(:,1,k), neighbors(:,2,k) );
+    accuracy = (trace(C)/10);
 
+    figure;
+    imagesc(C); 
+    colorbar 
+    title( sprintf( 'Classification accuracy: %f at KNN=%d ',accuracy, knn(k) ) )
 
+end
 
+%% chebychev ,  *hamming*
 
-%% scratch notes 
-% Mdl = fitcknn(img,labels,'NumNeighbors',5,'Standardize',1);
-% % classify.m 
-% % fitcknn()  k=1 for nearest neighbor  
-% % pdist2 to compute pairwise distances 
-% % title, subplot, imagesc, imshow, mean, imread, rgb2gray, dir, reshape
-% 
-% % filelist = dir('images/*.jpg');
-% %       for i=1:length(filelist)
-% %                imname = ['images/' filelist(i).name];
-% %                nextim = imread(imname);
-% %       . . .
-% %       end
-% 
-% load cifar-10-batches-mat/data_batch_1.mat
-% % load batches.meta.mat
-% 
-% %% convert training dataset of cifar10 
-% X = reshape(data', [32, 32, 3, 10000]);
-% X = permute(X, [2 1 3 4]);
-% Y = labels + 1;
-% 
-% save cifar10-test X Y
-% %% preview one picture
-% figure;
-% imshow(imresize(X(:,:,:,2), [128, 128]))
-% 
-% load cifar-10-batches-mat/test_batch.mat
-% test = reshape(data', [32, 32, 3, 10000]);
-% test = permute(test, [2 1 3 4]);
-% test_label = labels + 1;
-% 
-% figure; 
-% imshow(imresize(test(:,:,:,2), [128, 128]))
-% 
-% A=zeros([32 32 3 n]);
-% for i = 1:n
-% % use first 30 ...
-% R=train(i,1:1024); % first row = first image 
-% G=train(i,1025:2048);
-% B=train(i,2049:3072);
-% 
-% A(:,:,1,i)=reshape(R,32,32);
-% A(:,:,2,i)=reshape(G,32,32);
-% A(:,:,3,i)=reshape(B,32,32); % this is of data type double 
-% 
-% end
-% figure;
-% subplot(1,2,1)
-% imshow(imresize(uint8(A(:,:,:,1)), [128, 128]))
-% subplot(1,2,2)
-% imshow(imresize(uint8(A(:,:,:,4)), [128, 128]))
-% 
-% for i=1:n
-% figure; 
-% imshow(imresize(traind(:,:,:,i), [128, 128]))
-% end
-% 
-% [IDX,D] = knnsearch(X,Y)
-% 
-% for i = 1:n
-%     for j = 1:n
-% 
-% [class] = KNNClassifier( train, test(i,:), knn, y_train) % check one test sample against all training samples 
-% 
-% 
-%     end
-% end
-% 
-% % load cifar-10-batches-mat/test_batch.mat
-% load cifar-10-batches-mat/data_batch_1.mat
-% load cifar-10-batches-mat/batches.meta.mat
-% size(data)
-%    
-% n=30;
-% A=zeros([32 32 3 n]);
-% 
-% for i = 1:n
-% % use first 30 ...
-% R=data(i,1:1024); % first row = first image 
-% G=data(i,1025:2048);
-% B=data(i,2049:3072);
-% 
-% A(:,:,1,i)=reshape(R,32,32);
-% A(:,:,2,i)=reshape(G,32,32);
-% A(:,:,3,i)=reshape(B,32,32); % this is of data type double 
-% 
-% end
-% 
-% i=30
-% figure; 
-% subplot(1,2,1)
-% imshow(uint8(A(:,:,:,i))) % to imshow/image, must convert from double to uint8 
-% subplot(1,2,2)
-% imagesc(uint8(A(:,:,:,i)))
-% 
-% 
-% img = A(:,:,:,i);
+D = pdist2(train,test,'hamming'); % returns D(i,j) where X(i) Y(j)
 
+knn=[1 3 5];
+neighbors = zeros(n,3,length(knn));
+
+for k=1:length(knn) 
+    
+    for traincol=1:n
+        
+        [colval,colidx] = sort(D(:,traincol));
+        neighbor1 = traincol; % training obs 
+        neighbors2 = colidx(1:knn(k)); % test obs
+        class = mode( test_label( neighbors2(:) ) ); 
+        neighbors(traincol,1,k) = train_label(neighbor1); % training label 
+        neighbors(traincol,2,k) = class; % predicted class label 
+        neighbors(traincol,3,k) = test_label(neighbors2(1)); %  
+    end
+    
+    [C,order] = confusionmat( neighbors(:,1,k), neighbors(:,2,k) );
+    accuracy = (trace(C)/10);
+
+    figure;
+    imagesc(C); 
+    colorbar 
+    title( sprintf( 'Classification accuracy: %f at KNN=%d ',accuracy, knn(k) ) )
+%     imwrite(imagesc(C),'figc7.png')
+end
 
