@@ -33,6 +33,10 @@ difference = abs(train - test);
 
 l1_dist = sum(difference,2); 
 
+
+
+% pdist( , 'spearman')
+
 % sort the differences in increasing order and store the array index.
 % because we will need the original indices later to get the neighbors. 
 [~, index] = sort(l1_dist); 
