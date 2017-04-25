@@ -1,0 +1,3 @@
+%% detect_template_correlation.m 
+img = imread('dilbert1.jpg');
+im2double(img);
