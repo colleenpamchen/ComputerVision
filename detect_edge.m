@@ -18,4 +18,9 @@ filt = fspecial('gaussian') ;
 % for sigma is 0.5. Not recommended. Use imgaussfilt or imgaussfilt3 instead.
 
 
-% conv2('same') 
+C = conv2(A,filt,'same');
+figure;imagesc(C)
+
+
+
+
