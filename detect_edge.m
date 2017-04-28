@@ -6,9 +6,12 @@
 
 img = imread('dilbert1.jpg');
 figure;imshow(img) 
+
 A = im2double(img);
 figure; imagesc(A)
-filt = fspecial('gaussian') ;
+
+sigma=0.5;
+filt = fspecial('gaussian',sigma) ;
 
 % filt = fspecial('gaussian', hsize, sigma) ;
 % returns a rotationally symmetric Gaussian lowpass filter of size hsize 
@@ -21,6 +24,11 @@ filt = fspecial('gaussian') ;
 C = conv2(A,filt,'same');
 figure;imagesc(C)
 
+[gmag, gdir] = imgradient(C);
+
+figure
+imshowpair(Gmag, Gdir, 'montage');
+title('Gradient Magnitude, Gmag (left), and Gradient Direction, Gdir (right), using Prewitt method')
 
 
 
