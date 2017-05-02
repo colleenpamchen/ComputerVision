@@ -16,13 +16,12 @@ ylabel('Amplitude')
 title('Square Periodic Wave')
 
 
-m2=abs(fft(x2));
-m1=abs(fft(x1));
+m2=abs(fftshift(fft(x2)));
+m1=abs(fftshift(fft(x1)));
 
 figure;
 subplot(2,1,1)
 plot(t,m2)
-title('Magnitude')
 subplot(2,1,2)
 plot(t,m1)
 title('Magnitude')
@@ -33,15 +32,15 @@ x = 0:0.1:10;
 y = normpdf(x,5,1);
 subplot(2,1,1)
 plot(x,y)
-xlabel('sigma=2')
+xlabel('sigma=1')
 
 y2 = normpdf(x,5,2);
 subplot(2,1,2)
 plot(x,y2)
-xlabel('sigma=1')
+xlabel('sigma=2')
 
-m1=abs(fft(y));
-m2=abs(fft(y2));
+m1=abs(fftshift(fft(y)));
+m2=abs(fftshift(fft(y2)));
 
 figure;
 subplot(2,1,1)
@@ -51,7 +50,7 @@ plot(x,m2)
 title('Magnitude')
 
 
-%%
+%% 2D DFT 
 img1 = imread('dilbert1.jpg');
 img2 = rgb2gray(imread('zebra1.jpg'));
 img3 = rgb2gray(imread('zebra2.jpg'));
@@ -99,58 +98,23 @@ figure; plot(m2)
 
 % m2 p1
 img3=zeros(n,m); 
+temp3 = zeros(size(img1)); 
 for i = (1:m)
     temp3(:,i) = ifft(m2(:,i));
 end
-
 for j = (1:n)
     f3(j,:) = ifft(temp3(j,:));
 end
 
-plot(abs(f3));
-imagesc(abs(f3));
+temp4 = zeros(size(img1)); 
+for i = (1:m)
+    temp4(:,i) = ifft(p1(:,i));
+end
+for j = (1:n)
+    f4(j,:) = ifft(temp4(j,:));
+end
+
+% plot(abs(f3));
+% imagesc(abs(f3));
 imshow(abs(f3));
-
-
-%%
-
-f1 = (0:length(y)-1)*100/length(y);        % Frequency vector
-
-subplot(2,1,1)
-plot(f1,m)
-title('Magnitude')
-ax = gca;
-ax.XTick = [15 40 60 85];
-
-subplot(2,1,2)
-plot(f1,p*180/pi)
-title('Phase')
-ax = gca;
-ax.XTick = [15 40 60 85];
-
-n = 512;
-y = fft(x,n);
-m = abs(y);
-p = unwrap(angle(y));
-f1 = (0:length(y)-1)*100/length(y);
-
-subplot(2,1,1)
-plot(f1,m)
-title('Magnitude')
-ax = gca;
-ax.XTick = [15 40 60 85];
-
-subplot(2,1,2)
-plot(f1,p*180/pi)
-title('Phase')
-ax = gca;
-ax.XTick = [15 40 60 85];
-
-t = 0:1/255:1;
-x = sin(2*pi*120*t);
-y = real(ifft(fft(x)));
-
-figure
-plot(t,x-y)
-
 

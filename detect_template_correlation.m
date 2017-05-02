@@ -3,31 +3,22 @@ img = imread('dilbert1.jpg');
 A = im2double(img);
 
 figure; imagesc(A);
+% manually crop out an object as the training set 
+train = A(48:48+20, 371:371+50); 
+figure;imagesc(train)
+[n,m]=size(train);
 
+B = imfilter(A,train);
 
-figure;imagesc(A(48:48+10, 371:371+20 ))
+figure;imagesc(B); 
+colormap default
 
-B=imfilter(A,H)
-
-
-L = (x(2:end-1) > x(1:end-2)) % bigger than our neighbor to the left?
-R = (x(2:end-1) > x(3:end)) % bigger than our neighbor to the right?
-T = x(2:end-1) > threshold %above detection threshold?
-maxima = R & L & T
-
-
-%fliplr/flipud
-
-% conv2('same') 
-
-% take derivative with respect to time 
-% computational motion model
-% velocity from image to real world and vice versa
-% heading toward the wall, z (distance between the camera to the wall), the
-% value of z would decrease as you get closer to the wall 
-% reihart detector 
-% with dvs video, if edge moving along at some velocity 
-% v = dx/dt, dy/dt   as edge sweeps across sensor, 
-
+c = normxcorr2(train,A);
+figure; imagesc(c); colormap default
+[max_c, imax] = max(abs(c(:)));
+[ypeak, xpeak] = ind2sub(size(c),imax(1));
+corr_offset = [(xpeak-size(train,2)) (ypeak-size(train,1))];
+figure, imshow(A); hold on; 
+rectangle('position',[corr_offset(1) corr_offset(2) 50 50],'curvature',[1,1],'edgecolor','r','linewidth',2);
 
 
