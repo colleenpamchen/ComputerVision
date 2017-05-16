@@ -1,0 +1,77 @@
+%script for part A
+
+image = im2double(imread('segtest2.jpg'));
+figure
+imshow(image);
+imageSize = size(image);
+
+[pointsX,pointsY] = ginput(2);
+pointsX = floor(pointsX);
+pointsY = floor(pointsY);
+radius=1;
+
+foregroundVicinity = image(pointsY(1)-radius:pointsY(1)+radius,pointsX(1)-radius:pointsX(1)+radius,:);
+foreRed = foregroundVicinity(:,:,1);
+foreGreen = foregroundVicinity(:,:,2);
+foreBlue = foregroundVicinity(:,:,3);
+foreColor = [mean(foreRed(:)) mean(foreGreen(:)) mean(foreBlue(:))];
+
+backgroundVicinity = image(pointsY(2)-radius:pointsY(2)+radius,pointsX(2)-radius:pointsX(2)+radius,:);
+backRed = backgroundVicinity(:,:,1);
+backGreen = backgroundVicinity(:,:,2);
+backBlue = backgroundVicinity(:,:,3);
+backColor = [mean(backRed(:)) mean(backGreen(:)) mean(backBlue(:))];
+
+H = imageSize(1);
+W = imageSize(2);
+N = H*W;
+pixelData = reshape(image,[N 3]);
+backColorMatrix = repmat(backColor,[N 1]);
+foreColorMatrix = repmat(foreColor,[N 1]);
+foreRGBdist = sqrt(sum(abs(foreColorMatrix-pixelData),2));
+backRGBdist = sqrt(sum(abs(backColorMatrix-pixelData),2));
+
+lambda = 4;
+segclass = zeros(N,1);
+pairwise = sparse(N,N);
+
+% Define binary classification problem
+labelcost = [0 1;1 0]*lambda;
+unary = [foreRGBdist backRGBdist]';
+
+%add all horizontal links
+for x = 1:W-1
+  for y = 1:H
+    node  = 1 + (y-1) + (x-1)*H;
+    right = 1 + (y-1) + x*H;
+    dist = norm(pixelData(node,:)-pixelData(right,:));
+    pairwise(node,right) = dist;
+    pairwise(right,node) = dist;
+  end
+end
+
+%add all vertical nbr links
+for x = 1:W
+  for y = 1:H-1
+    node = 1 + (y-1) + (x-1)*H;
+    down = 1 + y + (x-1)*H;
+    dist = norm(pixelData(node,:)-pixelData(down,:));
+    pairwise(node,down) = dist;
+    pairwise(down,node) = dist;
+  end
+end
+
+[labels E Eafter] = GCMex(segclass, single(unary), pairwise, single(labelcost),0);
+
+figure
+
+subplot(211);
+hold on
+imshow(image);
+plot(pointsX,pointsY,'x','LineWidth',2);
+title('Original image');
+hold off
+
+subplot(212);
+imagesc(reshape(labels,[H W]));
+title('Min-cut');
