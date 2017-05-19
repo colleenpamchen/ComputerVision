@@ -5,7 +5,6 @@ function [x,y,score] = detect(I,template,ndet)
 %   score should contain the scores of the detections
 %
 
-
 % compute the feature map for the image
 f = hog(I);
 
