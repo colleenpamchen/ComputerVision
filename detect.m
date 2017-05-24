@@ -15,19 +15,10 @@ R = zeros(size(f,1),size(f,2));
 width = size(f,2);
 height = size(f,1);
 for i = 1:nori
-    %corrImage = xcorr2(f(:,:,i),template(:,:,i));
-    %midpointCorrImage = size(corrImage)./2;
-    %midRow = midpointCorrImage(1);
-    %midCol = midpointCorrImage(2);
-    %finalCorrImage = corrImage(midRow-(height/2):midRow+(height/2),...
-    %    midCol-(width/2):midCol+(width/2));
-    %R = R + finalCorrImage;
     corrImage = conv2(f(:,:,i),rot90(template(:,:,i)),'same');
     R = R + corrImage;
 end
-
-% now return locations of the top ndet detections
-
+% return locations of the top ndet detections
 % sort response from high to low
 [val,ind] = sort(R(:),'descend');
 
@@ -48,7 +39,7 @@ while ((detcount <= ndet) && (i <= length(ind)))
   yblock = mod(index-1,height)+1;
   xblock = floor((index-1)/height)+1;
 
-  assert(val(i)==R(yblock,xblock)); %make sure we did the indexing correctly
+  assert(val(i) == R(yblock,xblock)); %make sure we did the indexing correctly
 
   % now convert yblock,xblock to pixel coordinates 
   ypixel = yblock*8;
@@ -56,7 +47,7 @@ while ((detcount <= ndet) && (i <= length(ind)))
 
   % check if this detection overlaps any detections which we've already added to the list
   distSquared = (y-ypixel).^2 + (x-xpixel).^2;
-  overlappingPixels = double(distSquared<minDistSquared);
+  overlappingPixels = double(distSquared < minDistSquared);
   overlap = sum(overlappingPixels)>0;
   
   % if not, then add this detection location and score to the list we return

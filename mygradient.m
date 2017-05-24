@@ -3,18 +3,13 @@ function [mag,ori] = mygradient(I)
 % compute image gradient magnitude and orientation at each pixel
 %
 
-% dx = imfilter(...);
-% dy = imfilter(...);
-% 
-% mag = ...
-% ori = ...
+h = [1 -1];
+v = [1;-1];
 
+dx = imfilter(I,h);
+dy = imfilter(I,v); 
+complexImage = dx + dy*sqrt(-1) ;
 
-horizDeriv = [1 -1];
-vertDeriv = [1;-1];
-horizDerivImage = conv2(I,horizDeriv,'same');
-vertDerivImage = conv2(I,vertDeriv,'same');
-complexImage = horizDerivImage + vertDerivImage*sqrt(-1);
 mag = abs(complexImage);
 ori = angle(complexImage);
 
