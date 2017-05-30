@@ -3,7 +3,7 @@
 % 2) then call function detect.m which will use the patch template generated from ohist to 
 % to cross correlate with test image and return [x,y] corrdiates of
 % spectified number of detections. 
-
+close all
 % load a training example image
 Itrain = im2double(rgb2gray(imread('test1.jpg')));
 
